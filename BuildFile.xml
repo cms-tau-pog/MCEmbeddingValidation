@@ -8,6 +8,7 @@
 <use name="DataFormats/HLTReco"/>
 <use name="DataFormats/VertexReco"/>
 <use name="DataFormats/PatCandidates"/>
+<use name="RecoEgamma/EgammaTools"/>
 <use name="FWCore/ServiceRegistry"/>
 <use name="CommonTools/UtilAlgos"/>
 <use name="HLTrigger/HLTcore"/>

@@ -257,8 +257,10 @@ process.diMuonsSS = process.diMuons.clone(
    isSS = cms.bool(True)
 )
 
-process.p = cms.Path(process.ak5PFJetsL1FastL2L3 * process.rhoSequence * process.ak5JetTracksAssociatorAtVertex * process.btagging * process.isoSequence * process.producePFMETCorrections * process.muonRadiationFilter2ResultStripSel1 * process.muonRadiationFilter2ResultStripSel2 * process.muonRadiationFilter2ResultStripSel3 * process.diMuons * process.diMuonsSS)
+process.p = cms.Path(process.ak5PFJetsL1FastL2L3 * process.rhoSequence * process.ak5JetTracksAssociatorAtVertex * process.btagging * process.isoSequence * process.producePFMETCorrections * process.diMuons * process.diMuonsSS)
 if isData:
 	process.p.replace(process.ak5PFJetsL1FastL2L3, process.ak5PFJetsL1FastL2L3Residual)
 if useMvaMet:
 	process.p.replace(process.producePFMETCorrections, process.producePFMETCorrections * process.pfMEtMVAsequence)
+if isEmbedded and isRHEmbedded:
+	process.p.replace(process.diMuons, process.muonRadiationFilter2ResultStripSel1 * process.muonRadiationFilter2ResultStripSel2 * process.muonRadiationFilter2ResultStripSel3 * process.diMuons)

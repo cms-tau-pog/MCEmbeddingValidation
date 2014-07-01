@@ -341,6 +341,9 @@ private:
   int origGenNegChargedLepPDG;
 };
 
+namespace
+{
+
 static bool isQualityMuon(const reco::Muon& muon, const edm::Handle<std::vector<reco::Vertex> >& vertexPtr)
 {
   if(vertexPtr->empty()) return false;
@@ -365,70 +368,6 @@ bool isSuperior(const reco::Muon& candidate, const reco::Muon& to, const edm::Ha
     return candidateQuality == true;
   else
     return candidate.pt() > to.pt();
-}
-
-//
-// constants, enums and typedefs
-//
-
-//
-// static data member definitions
-//
-
-//
-// constructors and destructor
-//
-MuMuNTupleProducer::MuMuNTupleProducer(const edm::ParameterSet& iConfig)
-{
-   //now do what ever initialization is needed
-   writeAllEvents = iConfig.getParameter<bool>("writeAllEvents");
-   isEmbedded = iConfig.getParameter<bool>("isEmbedded");
-   isRHEmbedded = iConfig.getParameter<bool>("isRHEmbedded");
-   isGenEmbedded = iConfig.getParameter<bool>("isGenEmbedded");
-   isData = iConfig.getParameter<bool>("isData");
-   isSS = iConfig.getParameter<bool>("isSS");
-
-   triggerSource = iConfig.getParameter<edm::InputTag>("TriggerSource");
-   triggerEventSource = iConfig.getParameter<edm::InputTag>("TriggerEventSource");
-   if(isEmbedded) origTriggerSource = iConfig.getParameter<edm::InputTag>("OrigTriggerSource");
-
-   jetSource = iConfig.getParameter<edm::InputTag>("JetSource");
-   btagSource = iConfig.getParameter<edm::InputTag>("BTagSource");
-   trackSource = iConfig.getParameter<edm::InputTag>("TrackSource");
-
-   muonIsoDepsChargedParticlesSource = iConfig.getParameter<edm::InputTag>("MuonIsoDepsChargedParticlesSource");
-   muonIsoDepsChargedHadronsSource = iConfig.getParameter<edm::InputTag>("MuonIsoDepsChargedHadronsSource");
-   muonIsoDepsNeutralHadronsSource = iConfig.getParameter<edm::InputTag>("MuonIsoDepsNeutralHadronsSource");
-   muonIsoDepsPhotonsSource = iConfig.getParameter<edm::InputTag>("MuonIsoDepsPhotonsSource");
-   muonIsoDepsPUSource = iConfig.getParameter<edm::InputTag>("MuonIsoDepsPUSource");
-
-   muonSource = iConfig.getParameter<edm::InputTag>("MuonSource");
-   if(isEmbedded) origMuonSource = iConfig.getParameter<edm::InputTag>("OrigMuonSource");
-   rhoNeutralSource = iConfig.getParameter<edm::InputTag>("RhoNeutralSource");
-   if(isEmbedded) origRhoNeutralSource = iConfig.getParameter<edm::InputTag>("OrigRhoNeutralSource");
-   caloMetSource = iConfig.getParameter<edm::InputTag>("CaloMetSource");
-   pfMetSource = iConfig.getParameter<edm::InputTag>("PfMetSource");
-   pfType1CorrectedMetSource = iConfig.getParameter<edm::InputTag>("PfType1CorrectedMetSource");
-   mvaPfMetSource = iConfig.getParameter<edm::InputTag>("MvaPfMetSource");
-   if(isEmbedded) origCaloMetSource = iConfig.getParameter<edm::InputTag>("OrigCaloMetSource");
-   if(isEmbedded) origPfMetSource = iConfig.getParameter<edm::InputTag>("OrigPfMetSource");
-   vertexSource = iConfig.getParameter<edm::InputTag>("VertexSource");
-   pileupSummaryInfoSource = iConfig.getParameter<edm::InputTag>("PileupSummaryInfoSource");
-   if(isEmbedded) origVertexSource = iConfig.getParameter<edm::InputTag>("OrigVertexSource");
-
-   if(isEmbedded || !isData) genParticlesSource = iConfig.getParameter<edm::InputTag>("GenParticlesSource");;
-   if(isEmbedded && !isData) origGenParticlesSource = iConfig.getParameter<edm::InputTag>("OrigGenParticlesSource");;
-
-   hltIsoMu17Index = hltIsoMu24Index = hltIsoMu24Eta2p1Index = hltDoubleMu7Index = hltMu13Mu8Index = hltMu17Mu8Index = NO_TRIGGER;
-}
-
-
-MuMuNTupleProducer::~MuMuNTupleProducer()
-{
- 
-   // do anything here that needs to be done at desctruction time
-   // (e.g. close files, deallocate resources etc.)
-
 }
 
 unsigned int getTrigger(const HLTConfigProvider& hltConfig,
@@ -523,10 +462,6 @@ std::pair<const reco::Muon*, const reco::Muon*> getMuons(const std::vector<reco:
    return std::make_pair(posMuon, negMuon);
 }
 
-//
-// member functions
-//
-
 const reco::Candidate* getStableParticle(const reco::Candidate* part)
 {
   const reco::Candidate* test = part;
@@ -548,6 +483,64 @@ const reco::Candidate* getStableParticle(const reco::Candidate* part)
   }
 
   return NULL;
+}
+
+} // anonymous namespace
+
+//
+// constructors and destructor
+//
+MuMuNTupleProducer::MuMuNTupleProducer(const edm::ParameterSet& iConfig)
+{
+   //now do what ever initialization is needed
+   writeAllEvents = iConfig.getParameter<bool>("writeAllEvents");
+   isEmbedded = iConfig.getParameter<bool>("isEmbedded");
+   isRHEmbedded = iConfig.getParameter<bool>("isRHEmbedded");
+   isGenEmbedded = iConfig.getParameter<bool>("isGenEmbedded");
+   isData = iConfig.getParameter<bool>("isData");
+   isSS = iConfig.getParameter<bool>("isSS");
+
+   triggerSource = iConfig.getParameter<edm::InputTag>("TriggerSource");
+   triggerEventSource = iConfig.getParameter<edm::InputTag>("TriggerEventSource");
+   if(isEmbedded) origTriggerSource = iConfig.getParameter<edm::InputTag>("OrigTriggerSource");
+
+   jetSource = iConfig.getParameter<edm::InputTag>("JetSource");
+   btagSource = iConfig.getParameter<edm::InputTag>("BTagSource");
+   trackSource = iConfig.getParameter<edm::InputTag>("TrackSource");
+
+   muonIsoDepsChargedParticlesSource = iConfig.getParameter<edm::InputTag>("MuonIsoDepsChargedParticlesSource");
+   muonIsoDepsChargedHadronsSource = iConfig.getParameter<edm::InputTag>("MuonIsoDepsChargedHadronsSource");
+   muonIsoDepsNeutralHadronsSource = iConfig.getParameter<edm::InputTag>("MuonIsoDepsNeutralHadronsSource");
+   muonIsoDepsPhotonsSource = iConfig.getParameter<edm::InputTag>("MuonIsoDepsPhotonsSource");
+   muonIsoDepsPUSource = iConfig.getParameter<edm::InputTag>("MuonIsoDepsPUSource");
+
+   muonSource = iConfig.getParameter<edm::InputTag>("MuonSource");
+   if(isEmbedded) origMuonSource = iConfig.getParameter<edm::InputTag>("OrigMuonSource");
+   rhoNeutralSource = iConfig.getParameter<edm::InputTag>("RhoNeutralSource");
+   if(isEmbedded) origRhoNeutralSource = iConfig.getParameter<edm::InputTag>("OrigRhoNeutralSource");
+   caloMetSource = iConfig.getParameter<edm::InputTag>("CaloMetSource");
+   pfMetSource = iConfig.getParameter<edm::InputTag>("PfMetSource");
+   pfType1CorrectedMetSource = iConfig.getParameter<edm::InputTag>("PfType1CorrectedMetSource");
+   mvaPfMetSource = iConfig.getParameter<edm::InputTag>("MvaPfMetSource");
+   if(isEmbedded) origCaloMetSource = iConfig.getParameter<edm::InputTag>("OrigCaloMetSource");
+   if(isEmbedded) origPfMetSource = iConfig.getParameter<edm::InputTag>("OrigPfMetSource");
+   vertexSource = iConfig.getParameter<edm::InputTag>("VertexSource");
+   pileupSummaryInfoSource = iConfig.getParameter<edm::InputTag>("PileupSummaryInfoSource");
+   if(isEmbedded) origVertexSource = iConfig.getParameter<edm::InputTag>("OrigVertexSource");
+
+   if(isEmbedded || !isData) genParticlesSource = iConfig.getParameter<edm::InputTag>("GenParticlesSource");;
+   if(isEmbedded && !isData) origGenParticlesSource = iConfig.getParameter<edm::InputTag>("OrigGenParticlesSource");;
+
+   hltIsoMu17Index = hltIsoMu24Index = hltIsoMu24Eta2p1Index = hltDoubleMu7Index = hltMu13Mu8Index = hltMu17Mu8Index = NO_TRIGGER;
+}
+
+
+MuMuNTupleProducer::~MuMuNTupleProducer()
+{
+ 
+   // do anything here that needs to be done at desctruction time
+   // (e.g. close files, deallocate resources etc.)
+
 }
 
 // ------------ method called for each event  ------------
