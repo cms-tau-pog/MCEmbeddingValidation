@@ -178,6 +178,8 @@ private:
   edm::InputTag genParticlesSource;
   edm::InputTag origGenParticlesSource;
 
+  std::map<std::string, edm::InputTag> tauSpinnerSources;
+
   TTree* tree;
   TH1F* h_nTrueInteractions;
 
@@ -187,7 +189,7 @@ private:
 
   float minVisPtFilterWeight;
   float zmumuEvtSelEffCorrWeight;
-  float tauSpinWeight;
+  std::map<std::string, float> tauSpinWeights;
 
   bool muonRadiationFilter;
   bool muonRadiationFilter2Sel1;
@@ -251,9 +253,16 @@ SinglePionNTupleProducer::SinglePionNTupleProducer(const edm::ParameterSet& iCon
 
    pileupSummaryInfoSource = iConfig.getParameter<edm::InputTag>("PileupSummaryInfoSource");
    genParticlesSource = iConfig.getParameter<edm::InputTag>("GenParticlesSource");
-   if(isEmbedded) origGenParticlesSource = iConfig.getParameter<edm::InputTag>("OrigGenParticlesSource");;
-}
+   if(isEmbedded) origGenParticlesSource = iConfig.getParameter<edm::InputTag>("OrigGenParticlesSource");
 
+   const edm::ParameterSet tauSpinnerSourcesPset = iConfig.getParameter<edm::ParameterSet>("TauSpinnerSources");
+   const std::vector<std::string> tauSpinnerSourceLabels = tauSpinnerSourcesPset.getParameterNames();
+   for(std::vector<std::string>::const_iterator iter = tauSpinnerSourceLabels.begin(); iter != tauSpinnerSourceLabels.end(); ++iter)
+   {
+     tauSpinnerSources[*iter] = tauSpinnerSourcesPset.getParameter<edm::InputTag>(*iter);
+     tauSpinWeights[*iter] = 0.f;
+   }
+}
 
 SinglePionNTupleProducer::~SinglePionNTupleProducer()
 {
@@ -298,7 +307,7 @@ SinglePionNTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetu
       if(abs(cand->pdgId()) != 15)
             continue;
       assert(isEmbedded || cand->status() == 3);
-      assert(cand->mother(0)->numberOfDaughters() == 3); // ???
+      //assert(cand->mother(0)->numberOfDaughters() == 3); // ???
       assert(cand->mother(0)->mother(0)->pdgId() != 23);
 
       if(cand->pdgId() < 0)
@@ -375,19 +384,21 @@ SinglePionNTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetu
    // Get weight for embedded events
    minVisPtFilterWeight = 1.0f;
    zmumuEvtSelEffCorrWeight = 1.0f;
-   tauSpinWeight = 1.0f;
 
    muonRadiationFilter = true;
    muonRadiationFilter2Sel1 = true;
    muonRadiationFilter2Sel2 = true;
    muonRadiationFilter2Sel3 = true;
 
-   if(isEmbedded)
+   for(std::map<std::string, edm::InputTag>::const_iterator iter = tauSpinnerSources.begin(); iter != tauSpinnerSources.end(); ++iter)
    {
       edm::Handle<double> hTauSpinnerWT;
-      iEvent.getByLabel(edm::InputTag("TauSpinnerReco", "TauSpinnerWT", "EmbeddedSPIN"), hTauSpinnerWT);
-      tauSpinWeight = *hTauSpinnerWT;
+      iEvent.getByLabel(iter->second, hTauSpinnerWT);
+      tauSpinWeights[iter->first] = *hTauSpinnerWT;
+   }
 
+   if(isEmbedded)
+   {
       edm::Handle<GenFilterInfo> hGenFilterInfo;
       iEvent.getByLabel(edm::InputTag("generator", "minVisPtFilter", "EmbeddedRECO"), hGenFilterInfo);
       minVisPtFilterWeight = hGenFilterInfo->filterEfficiency();
@@ -479,7 +490,8 @@ SinglePionNTupleProducer::beginJob()
 
   tree->Branch("MinVisPtFilterWeight", &minVisPtFilterWeight, "MinVisPtFilterWeight/F");
   tree->Branch("ZmumuEvtSelEffCorrWeight", &zmumuEvtSelEffCorrWeight, "ZmumuEvtSelEffCorrWeight/F");
-  tree->Branch("TauSpinWeight", &tauSpinWeight, "TauSpinWeight/F");
+  for(std::map<std::string, edm::InputTag>::const_iterator iter = tauSpinnerSources.begin(); iter != tauSpinnerSources.end(); ++iter)
+    tree->Branch(("TauSpinWeight" + iter->first).c_str(), &tauSpinWeights[iter->first], ("TauSpinWeight" + iter->first + "/F").c_str());
 
   tree->Branch("MuonRadiationFilter", &muonRadiationFilter, "MuonRadiationFilter/O");
   tree->Branch("MuonRadiationFilter2Sel1", &muonRadiationFilter2Sel1, "MuonRadiationFilter2Sel1/O");

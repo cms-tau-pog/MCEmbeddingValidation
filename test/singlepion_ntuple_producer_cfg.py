@@ -16,6 +16,8 @@ process.TFileService = cms.Service("TFileService", fileName = cms.string('output
 isData = False
 isEmbedded = False
 isGenEmbedded = False
+
+# For grid-control override:
 if not "@IS_EMBEDDED@".startswith('@'):
 	isEmbedded = ("@IS_EMBEDDED@".lower() == 'true')
 if not "@IS_GEN_EMBEDDED@".startswith('@'):
@@ -57,6 +59,14 @@ process.muonRadiationFilter2ResultStripSel3 = process.muonRadiationFilter2.clone
 	stripSelection = cms.VPSet(process.muonRadiationFilter2.stripSelection[2]))
 
 ############################################
+# TauSpinner
+if isEmbedded:
+	tauSpinnerSources = cms.PSet(
+		Default = cms.InputTag("TauSpinnerReco", "TauSpinnerWT", "EmbeddedSPIN"))
+else:
+	tauSpinnerSources = cms.PSet()
+
+############################################
 # EDAnalyzer
 
 process.spinTest = cms.EDAnalyzer('SinglePionNTupleProducer',
@@ -65,7 +75,9 @@ process.spinTest = cms.EDAnalyzer('SinglePionNTupleProducer',
 
    PileupSummaryInfoSource = cms.InputTag("addPileupInfo", "", "HLT"),
    GenParticlesSource = genParticlesSource,
-   OrigGenParticlesSource = origGenParticlesSource
+   OrigGenParticlesSource = origGenParticlesSource,
+
+   TauSpinnerSources = tauSpinnerSources
 )
 
 if isEmbedded:
