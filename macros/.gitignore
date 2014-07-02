@@ -1,3 +1,5 @@
 AnalyzeSinglePionNTuples
+AnalyzeLepTauNTuples
+AnalyzeInputMuMuNTuples
 *.pyc
 plots

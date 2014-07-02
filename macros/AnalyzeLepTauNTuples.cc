@@ -1503,7 +1503,7 @@ void process_dataset(const char* dataset, const std::vector<std::string>& files)
 	else throw std::runtime_error("Unknown channel for dataset \"" + std::string(dataset) + "\"");
 
 	std::stringstream out_filename_stream;
-	out_filename_stream << "data/out-";
+	out_filename_stream << "out-";
 	if(strncmp(dataset, "embedtest", 9) != 0) out_filename_stream << "embedtest_";
 	out_filename_stream << dataset << "-" << channel;
 	out_filename_stream << ".root";
